@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>CardZ — 废土卡牌地牢</title>
+  <!-- 站点图标必须保持公开：浏览器在页面解析阶段就会请求，此时用户还没登录，
+       拿不到 Supabase 签名链接。把这 4 个文件从 assets/ 移到仓库里的 icons/ 即可，
+       它们只是图标，不属于需要保护的游戏内容。 -->
+  <link rel="icon" href="icons/favicon.svg" type="image/svg+xml" />
+  <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png" />
+  <link rel="icon" href="icons/favicon-16.png" sizes="16x16" type="image/png" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/auth.css" />
+
+  <style>
+    .merchant-list{display:grid;gap:18px;margin:18px 0;max-height:62vh;overflow:auto;padding:4px 10px 14px 4px}
+    .merchant-offer{display:grid;grid-template-columns:auto 1fr minmax(110px,auto);gap:16px;align-items:center;padding:16px;border:1px solid rgba(255,255,255,.12);border-radius:12px;background:rgba(20,18,15,.72);margin-bottom:10px}
+    .merchant-offer .btn{align-self:end;margin-top:12px;margin-bottom:10px}
+    .merchant-offer-info p{line-height:1.55;margin:.45em 0 .8em}.merchant-price{font-weight:700;margin-top:8px}.mechanic-service{grid-template-columns:1fr minmax(125px,auto)}
+    @media(max-width:680px){.merchant-offer{grid-template-columns:auto 1fr}.merchant-offer .btn{grid-column:1/-1;width:100%;margin-top:14px}.mechanic-service{grid-template-columns:1fr}}
+
+    /* 63号避难所确认弹窗 */
+    .shelter-confirm-text{line-height:1.6;margin:14px 0 20px}
+
+    /* 武器耐久过低时的 HUD 视觉警告 */
+    @keyframes durWarnPulse{0%{opacity:1}50%{opacity:.35}100%{opacity:1}}
+    .hud-weapon.low-durability{outline:1.5px solid rgba(224,60,60,.75);border-radius:8px;box-shadow:0 0 10px rgba(224,60,60,.55);animation:durWarnPulse 1.1s ease-in-out infinite}
+    .hud-weapon.low-durability .hud-icon,.hud-weapon.low-durability #weapon-text{color:#ff5a4a}
+    .status-item.low-durability{outline:1.5px solid rgba(224,60,60,.75);box-shadow:0 0 8px rgba(224,60,60,.5);animation:durWarnPulse 1.1s ease-in-out infinite}
+    .status-item.low-durability .si-icon{filter:drop-shadow(0 0 2px rgba(255,90,74,.8))}
+    .status-item.low-durability .si-val{color:#ff8a7a}
+
+    /* 游戏棋盘自适应：HUD 与状态栏固定占位，棋盘只使用剩余空间，并尽可能放大。 */
+    #screen-game{height:100dvh;min-height:0;box-sizing:border-box;overflow:hidden;flex-direction:column}
+    #screen-game #hud{flex:0 0 auto}
+    #screen-game #status-bar{flex:0 0 auto;max-height:18dvh;overflow:auto}
+    #screen-game #board-wrap{flex:1 1 auto;min-height:0;min-width:0;width:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;box-sizing:border-box}
+    #screen-game #board{display:block;max-width:100%;max-height:100%;touch-action:manipulation}
+    #screen-game #game-footer{flex:0 0 auto}
+    @media(max-width:680px){
+      #screen-game #status-bar{max-height:22dvh}
+      #screen-game #board-wrap{padding:2px 0}
+    }
+
+    /* 追猎者 / 幸存者交互弹窗 */
+    .survivor-panel{max-width:520px;text-align:center;border:1px solid rgba(108,165,122,.35);box-shadow:0 18px 60px rgba(0,0,0,.5)}
+    .survivor-badge{display:inline-flex;align-items:center;gap:8px;padding:7px 13px;border-radius:999px;background:rgba(108,165,122,.12);border:1px solid rgba(108,165,122,.28);color:#b8d9c2;font-weight:700;margin-bottom:10px}
+    .survivor-status{display:flex;justify-content:center;gap:18px;margin:12px 0 16px;color:#d8c7ad}
+    .survivor-status b{color:#f0c77b}
+    .survivor-text{line-height:1.65;color:#d8c7ad;margin:10px auto 20px;max-width:430px}
+    .survivor-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media(max-width:680px){.survivor-actions{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div id="app">
+
+    <!-- ========== 登录 / 授权门禁（新增，游戏正式内容全部在授权通过后才会加载）========== -->
+    <section id="screen-auth" class="screen overlay active">
+      <div class="menu-bg"></div>
+      <div class="auth-panel">
+        <h1 class="game-title" style="font-size:44px;">CardZ</h1>
+        <p class="game-subtitle">请登录已开通的账号</p>
+
+        <div class="auth-tabs">
+          <button class="auth-tab active" data-mode="login">登录</button>
+          <button class="auth-tab" data-mode="signup">注册新账号</button>
+        </div>
+
+        <form id="auth-form" autocomplete="on">
+          <label>邮箱
+            <input type="email" id="auth-email" required autocomplete="username" />
+          </label>
+          <label>密码
+            <input type="password" id="auth-password" required minlength="6" autocomplete="current-password" />
+          </label>
+          <button type="submit" class="btn btn-primary" id="auth-submit">登录</button>
+        </form>
+
+        <div id="auth-status" class="auth-status"></div>
+        <p class="auth-hint">注册成功后请联系客服并提供付款凭证<br>管理员确认后会为该邮箱账号开通游玩权限<br>客服微信：Nicolas6392</br></p>
+      </div>
+    </section>
+
+    <section id="screen-menu" class="screen active">
+      <div class="menu-bg"></div>
+      <div class="menu-content">
+        <h1 class="game-title">CardZ</h1>
+        <p class="game-subtitle">Wasteland Card Dungeon By Nicolas</p>
+        <div class="menu-buttons">
+          <button class="btn btn-primary" id="btn-play">开始游戏</button>
+          <button class="btn" id="btn-continue">继续冒险</button>
+          <button class="btn" id="btn-heroes">英雄选择</button>
+          <button class="btn" id="btn-codex">图鉴 / 解锁</button>
+          <button class="btn" id="btn-help">游戏说明</button>
+        </div>
+        <div class="menu-footer">
+          <span id="menu-highscore">最高分: 0</span>
+          <span id="menu-account" class="menu-account"></span>
+        </div>
+      </div>
+    </section>
+
+    <section id="screen-setup" class="screen">
+      <div class="panel">
+        <h2>准备出发</h2>
+        <div class="setup-block"><h3>选择难度</h3><div class="chip-row" id="difficulty-row"></div></div>
+        <div class="setup-block"><h3>选择英雄</h3><div class="hero-row" id="hero-select-row"></div></div>
+        <div class="panel-buttons">
+          <button class="btn" id="btn-setup-back">返回</button>
+          <button class="btn btn-primary" id="btn-setup-start">进入废土</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="screen-game" class="screen">
+      <header id="hud">
+        <div class="hud-left">
+          <div class="hud-stat hud-hp" id="hp-stat"><span class="hud-icon">❤</span>
+            <div class="hud-bar"><div class="hud-bar-fill" id="hp-fill"></div><span id="hp-text">0/0</span></div></div>
+          <div class="hud-stat hud-weapon" id="weapon-stat" title="战斗力"><span class="hud-icon">⚔</span><span class="weapon-hud-copy"><span id="weapon-name">徒手</span><span class="weapon-power">战力 <b id="weapon-text">0</b></span></span></div>
+        </div>
+        <div class="hud-right">
+          <div class="hud-stat hud-gold"><span class="hud-icon">◉</span><span id="gold-text">0</span></div>
+          <div class="hud-stat hud-turn"><span class="hud-icon">↻</span><span id="turn-text">0</span></div>
+          <div class="hud-stat hud-diff"><span id="diff-text">普通</span></div>
+          <button class="icon-btn" id="btn-ability" title="主动技能">✦</button>
+          <button class="icon-btn" id="btn-pause" title="菜单">☰</button>
+        </div>
+      </header>
+      <div id="status-bar" class="status-bar"></div>
+      <div id="board-wrap"><canvas id="board"></canvas></div>
+      <footer id="game-footer"><div id="log-line">在废墟中求生……</div></footer>
+    </section>
+
+    <section id="screen-pause" class="screen overlay">
+      <div class="panel small">
+        <h2>暂停</h2>
+        <div class="panel-buttons vertical">
+          <button class="btn btn-primary" id="btn-resume">继续</button>
+          <button class="btn" id="btn-restart">重新开始本局</button>
+          <button class="btn" id="btn-save-exit">保存并返回主菜单</button>
+          <button class="btn btn-danger" id="btn-quit">放弃本局</button>
+          <button class="btn" id="btn-logout">退出登录</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="screen-over" class="screen overlay">
+      <div class="panel">
+        <h2 id="over-title">你噶了</h2>
+        <div class="result-grid">
+          <div class="result-item"><span>本局得分</span><b id="res-score">0</b></div>
+          <div class="result-item"><span>历史最高</span><b id="res-best">0</b></div>
+          <div class="result-item"><span>击杀数</span><b id="res-kills">0</b></div>
+          <div class="result-item"><span>存活回合</span><b id="res-turns">0</b></div>
+        </div>
+        <div id="unlock-notice"></div>
+        <div class="panel-buttons">
+          <button class="btn btn-primary" id="btn-again">再来一局</button>
+          <button class="btn" id="btn-over-menu">返回主菜单</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="screen-shelter-confirm" class="screen overlay">
+      <div class="panel small">
+        <h2>63号避难所</h2>
+        <p class="shelter-confirm-text" id="shelter-confirm-text">支付 63 瓶盖即可清除全部负面状态并恢复至满生命。是否进入？</p>
+        <div class="panel-buttons vertical">
+          <button class="btn btn-primary" id="btn-shelter-yes">进入（-63瓶盖）</button>
+          <button class="btn" id="btn-shelter-no">不进入</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="screen-location-confirm" class="screen overlay">
+      <div class="panel small location-confirm-panel">
+        <div class="location-kicker">可搜刮地点</div>
+        <h2 id="location-confirm-title">废墟地点</h2>
+        <p id="location-confirm-text" class="location-confirm-text">是否搜刮？</p>
+        <div class="location-risk-note">搜刮可能获得物资，也可能受伤或一无所获。</div>
+        <div class="panel-buttons">
+          <button class="btn btn-primary" id="btn-location-yes">搜刮</button>
+          <button class="btn" id="btn-location-no">直接通过</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="screen-backpack" class="screen overlay">
+      <div class="panel backpack-panel">
+        <h2 id="backpack-title">背包</h2>
+        <div id="backpack-meta" class="backpack-meta"></div>
+        <div id="backpack-slots" class="backpack-slots"></div>
+        <div id="backpack-actions" class="panel-buttons backpack-actions"></div>
+        <div class="panel-buttons"><button class="btn" id="btn-backpack-close">关闭背包</button></div>
+      </div>
+    </section>
+
+    <section id="screen-backpack-swap" class="screen overlay">
+      <div class="panel small">
+        <h2>更换背包</h2>
+        <p id="backpack-swap-text" class="backpack-swap-text"></p>
+        <div id="backpack-swap-list" class="backpack-swap-list hidden"></div>
+        <div class="panel-buttons">
+          <button class="btn btn-primary" id="btn-backpack-swap-yes">更换背包</button>
+          <button class="btn" id="btn-backpack-swap-no">保留当前背包</button>
+          <button class="btn btn-primary hidden" id="btn-backpack-swap-confirm">确认保留并更换</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="screen-merchant" class="screen overlay">
+      <div class="panel wide merchant-panel">
+        <div class="merchant-head">
+          <div>
+            <h2>废土奸商</h2>
+            <div class="merchant-subtitle">“人生最大的不幸：人死了，钱没花完。”</div>
+          </div>
+          <div class="merchant-gold" id="merchant-gold">瓶盖：0</div>
+        </div>
+        <div id="merchant-list" class="merchant-list"></div>
+        <div class="panel-buttons">
+          <button class="btn" id="btn-merchant-close">离开交易界面</button>
+        </div>
+      </div>
+    </section>
+
+
+    <section id="screen-survivor" class="screen overlay">
+      <div class="panel small survivor-panel">
+        <div class="survivor-badge">🧑‍🦱 <span>幸存者</span></div>
+        <h2 id="survivor-title">幸存者</h2>
+        <div id="survivor-status" class="survivor-status"></div>
+        <p id="survivor-text" class="survivor-text">他警惕地看着你。</p>
+        <div class="survivor-actions">
+          <button class="btn btn-primary" id="btn-survivor-talk">交流</button>
+          <button class="btn" id="btn-survivor-swap">⇄ 换位</button>
+          <button class="btn" id="btn-survivor-rob">掠夺</button>
+        </div>
+        <div class="panel-buttons"><button class="btn" id="btn-survivor-close">离开</button></div>
+      </div>
+    </section>
+
+    <section id="screen-codex" class="screen">
+      <div class="panel wide">
+        <h2>图鉴 / 解锁</h2>
+        <div class="tabs">
+          <button class="tab active" data-tab="cards">卡牌</button>
+          <button class="tab" data-tab="heroes">英雄</button>
+          <button class="tab" data-tab="unlocks">进度</button>
+        </div>
+        <div class="codex-body" id="codex-body"></div>
+        <div class="panel-buttons"><button class="btn" id="btn-codex-back">返回</button></div>
+      </div>
+    </section>
+
+    <section id="screen-help" class="screen overlay">
+      <div class="panel">
+        <h2 id="help-title">如何游玩</h2>
+        <div id="help-body" class="help-body"></div>
+        <div class="panel-buttons">
+          <button class="btn" id="btn-help-prev">上一步</button>
+          <button class="btn btn-primary" id="btn-help-next">下一步</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ========== Supabase：登录 + 授权校验 + 动态加载游戏引擎 ==========
+       以下脚本是"公开"部分，会随 GitHub Pages 一起发布：
+       supabase-config.js 只包含 URL 和匿名(anon) key，这两个值本来就是公开可用的，
+       真正决定"能不能玩"的是 Supabase 数据库里的 is_authorized 字段 + RLS 权限策略，
+       而不是这几个 JS 文件本身。
+       游戏真正的玩法代码（cards.js / game.js / ui.js 等）不会出现在 GitHub 仓库里，
+       只有登录且授权通过后，才会从 Supabase 私有 Storage 生成临时签名链接下载执行。
+       素材（assets/）同理，由 assets.js 从私有桶 game-assets 拉取；
+       assets.js 必须排在 auth.js 前面，它会在引擎脚本执行前装好路径改写拦截。
+  -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="js/supabase-config.js"></script>
+  <script src="js/assets.js"></script>
+  <script src="js/loader.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>
