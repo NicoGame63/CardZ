@@ -103,9 +103,12 @@ html,body{margin:0;height:100%;font-family:"Georgia","Songti SC",serif;color:var
 #board-wrap{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;width:100%;padding:6px;}
 #board{background:transparent;touch-action:none;max-width:100%;max-height:100%;}
 #game-footer{width:100%;max-width:640px;padding:8px 14px 14px;}
-#log-line{text-align:center;color:var(--ink-dim);font-size:14px;min-height:20px;letter-spacing:.5px;
-  transition:color .2s;}
-#log-line.flash{color:var(--accent2);}
+#log-line{display:flex;flex-direction:column;justify-content:flex-end;gap:2px;
+  text-align:left;color:var(--ink-dim);font-size:12px;line-height:17px;min-height:55px;
+  max-height:55px;overflow:hidden;letter-spacing:.2px;transition:color .2s;}
+#log-line .log-entry{height:17px;min-height:17px;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;}
+#log-line.flash .log-entry:last-child{color:var(--accent2);}
 
 /* result */
 .result-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
