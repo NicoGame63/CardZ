@@ -308,3 +308,12 @@ html,body{margin:0;height:100%;font-family:"Georgia","Songti SC",serif;color:var
   72%{opacity:.72}
   100%{opacity:0}
 }
+
+/* 昼夜与天气状态指示 */
+.hud-turn{display:flex;flex-direction:column;align-items:center;gap:1px;line-height:1.05}
+.environment-text{font-size:10px;white-space:nowrap;color:#f0d69b;opacity:.96;text-shadow:0 1px 3px #000}
+.environment-text.env-rain{color:#a9d9f2}
+.environment-text.env-fog{color:#d6dfdc}
+.environment-text.env-snow{color:#e8f5ff}
+.environment-text.env-nuclear{color:#b9f47c;text-shadow:0 0 7px rgba(140,255,75,.55)}
+.environment-text.night{color:#b9c8ff}
