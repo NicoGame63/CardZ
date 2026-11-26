@@ -82,18 +82,17 @@ html,body{margin:0;height:100%;font-family:"Georgia","Songti SC",serif;color:var
 /* game */
 #screen-game{justify-content:flex-start;background:
   radial-gradient(120% 90% at 50% 0%, #2a1f16, #16100b 90%);}
-#hud{width:100%;max-width:640px;display:flex;justify-content:space-between;align-items:center;
+#hud{width:100%;max-width:640px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;
   padding:10px 12px;gap:8px;}
-.hud-left{display:flex;align-items:center;gap:8px;flex:1 1 auto;min-width:0;
-  overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-ms-overflow-style:none;
-  -webkit-overflow-scrolling:touch;padding-bottom:2px;}
-.hud-left::-webkit-scrollbar{display:none;height:0;}
+.hud-left{display:flex;align-items:stretch;gap:8px;flex:1 1 0;min-width:0;}
 .hud-right{display:flex;align-items:center;gap:6px;flex:0 0 auto;}
-.hud-stat{flex:0 0 auto;}
-.hud-stat{display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.28);
-  border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:15px;}
+.hud-stat{display:flex;align-items:center;justify-content:center;gap:6px;background:rgba(0,0,0,.28);
+  border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:15px;min-height:40px;}
+.hud-left .hud-stat{flex:1 1 auto;min-width:0;}
+.hud-left .hud-icon{flex:none;}
+.hud-gold{white-space:nowrap;font-variant-numeric:tabular-nums;}
 .hud-icon{font-size:16px;}
-.hud-hp .hud-bar{position:relative;width:96px;height:16px;border-radius:8px;
+.hud-hp .hud-bar{position:relative;width:96px;min-width:0;height:16px;border-radius:8px;
   background:#3a1e17;overflow:hidden;border:1px solid #5a2b1f;}
 .hud-bar-fill{position:absolute;inset:0;width:100%;
   background:linear-gradient(180deg,#d05a3c,#8f2c1e);transition:width .3s;}
@@ -144,13 +143,18 @@ html,body{margin:0;height:100%;font-family:"Georgia","Songti SC",serif;color:var
   .hud-stat{padding:4px 6px;font-size:12px;gap:4px;}
   .hud-hp .hud-bar{width:52px;height:14px;}
   .hud-icon{font-size:13px;}
-  .hud-diff{display:none;} /* 难度文字在小屏上省略，节省空间给技能/菜单按钮 */
+  .hud-stat{min-height:36px;}
+  .hud-left{gap:5px;}
   .icon-btn{width:36px;height:36px;font-size:16px;flex:0 0 36px;}
 }
-@media(max-width:380px){
-  .hud-turn{min-width:48px;gap:3px;padding:4px 5px;}
-  .hud-environment{min-width:0;padding:4px 6px;}
-  .environment-text{font-size:10px;}
+@media(max-width:460px){
+  .hud-left{flex:1 0 100%;}
+  .hud-right{margin-left:auto;}
+  .hud-hp .hud-bar{width:96px;}
+  .hud-diff{display:flex;}
+}
+@media(max-width:340px){
+  .hud-hp .hud-bar{width:68px;}
 }
 
 /* ---------- 状态栏 buff/debuff ---------- */
@@ -271,7 +275,7 @@ html,body{margin:0;height:100%;font-family:"Georgia","Songti SC",serif;color:var
 @media(max-width:520px){.backpack-slots{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.backpack-slot{min-height:205px}.backpack-slot-art{height:116px}}
 
 /* ---------- 顶部武器名称 / 功能地点确认 ---------- */
-.hud-weapon{min-width:96px}
+.hud-weapon{min-width:0}
 .weapon-hud-copy{display:flex;flex-direction:column;align-items:flex-start;line-height:1.05;min-width:0}
 #weapon-name{max-width:86px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink-dim);font-size:11px;letter-spacing:.3px}
 #weapon-name.armed{color:#d7c7ad}
@@ -282,7 +286,7 @@ html,body{margin:0;height:100%;font-family:"Georgia","Songti SC",serif;color:var
 .location-kicker{display:inline-block;margin:0 auto 7px;padding:4px 9px;border:1px solid #6b543d;border-radius:999px;background:rgba(0,0,0,.22);color:var(--accent2);font-size:11px;letter-spacing:2px}
 .location-confirm-text{line-height:1.65;margin:8px 0 12px;color:var(--ink)}
 .location-risk-note{padding:10px 12px;border:1px dashed var(--line);border-radius:10px;background:rgba(0,0,0,.18);color:var(--ink-dim);font-size:12px;line-height:1.5}
-@media(max-width:520px){.hud-weapon{min-width:82px;padding-left:5px;padding-right:5px;gap:4px}#weapon-name{max-width:56px;font-size:10px}.weapon-power{font-size:10px}.weapon-power b{font-size:13px}}
+@media(max-width:520px){.hud-weapon{min-width:0;padding-left:5px;padding-right:5px;gap:4px}#weapon-name{max-width:56px;font-size:10px}.weapon-power{font-size:10px}.weapon-power b{font-size:13px}}
 
 /* HUD 状态长按提示 */
 #status-hint-popup{position:fixed;z-index:9999;width:230px;max-width:80vw;display:flex;flex-direction:column;gap:6px;padding:12px 14px;border-radius:12px;background:rgba(25,18,12,.96);border:1px solid var(--accent2);box-shadow:0 8px 30px rgba(0,0,0,.7);color:var(--ink);font-size:13px;line-height:1.45;pointer-events:none;opacity:0;transform:translateY(8px);transition:.15s;}
@@ -311,14 +315,12 @@ html,body{margin:0;height:100%;font-family:"Georgia","Songti SC",serif;color:var
   100%{opacity:0}
 }
 
-/* 昼夜与天气状态指示 */
-.hud-turn{display:flex;align-items:center;gap:6px;line-height:1.05;min-width:62px;justify-content:center}
-.hud-stat-label{font-size:11px;color:var(--ink-dim)}
-.hud-turn #turn-text{font-variant-numeric:tabular-nums;font-size:15px}
-.hud-environment{justify-content:center;min-width:116px;padding:6px 9px}
-.environment-text{font-size:11px;white-space:nowrap;color:#f0d69b;opacity:.96;text-shadow:0 1px 3px #000}
-.environment-text.env-rain{color:#a9d9f2}
-.environment-text.env-fog{color:#d6dfdc}
-.environment-text.env-snow{color:#e8f5ff}
-.environment-text.env-nuclear{color:#b9f47c;text-shadow:0 0 7px rgba(140,255,75,.55)}
-.environment-text.night{color:#b9c8ff}
+/* 昼夜与天气状态指示（状态栏常驻项） */
+.st-environment{border-color:#80653f;background:rgba(100,76,38,.24);white-space:nowrap;}
+.st-environment .si-label{display:inline;color:#f0d69b;}
+.st-environment .si-val{color:#f0d69b;}
+.st-environment.night .si-label{color:#b9c8ff;}
+.st-environment.env-rain .si-val{color:#a9d9f2;}
+.st-environment.env-fog .si-val{color:#d6dfdc;}
+.st-environment.env-snow .si-val{color:#e8f5ff;}
+.st-environment.env-nuclear .si-val{color:#b9f47c;text-shadow:0 0 7px rgba(140,255,75,.55);}
