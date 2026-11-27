@@ -82,23 +82,25 @@ html,body{margin:0;height:100%;font-family:"Georgia","Songti SC",serif;color:var
 /* game */
 #screen-game{justify-content:flex-start;background:
   radial-gradient(120% 90% at 50% 0%, #2a1f16, #16100b 90%);}
-#hud{width:100%;max-width:640px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;
-  padding:10px 12px;gap:8px;}
-.hud-left{display:flex;align-items:stretch;gap:8px;flex:1 1 0;min-width:0;}
-.hud-right{display:flex;align-items:center;gap:6px;flex:0 0 auto;}
-.hud-stat{display:flex;align-items:center;justify-content:center;gap:6px;background:rgba(0,0,0,.28);
-  border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:15px;min-height:40px;}
-.hud-left .hud-stat{flex:1 1 auto;min-width:0;}
+/* 顶部 HUD：数值按内容占位，技能和菜单固定在同一行。 */
+#hud{width:100%;max-width:640px;display:flex;flex-wrap:nowrap;justify-content:space-between;align-items:center;
+  padding:8px 10px;gap:6px;}
+.hud-left{display:flex;align-items:stretch;gap:5px;flex:0 1 auto;min-width:0;}
+.hud-right{display:flex;align-items:center;gap:5px;flex:0 0 auto;}
+.hud-stat{display:flex;align-items:center;justify-content:center;gap:4px;background:rgba(0,0,0,.28);
+  border:1px solid var(--line);border-radius:8px;padding:4px 7px;font-size:14px;min-height:40px;white-space:nowrap;}
+.hud-left .hud-stat{flex:0 0 auto;}
+.hud-left .hud-weapon{flex:0 1 auto;min-width:0;}
 .hud-left .hud-icon{flex:none;}
-.hud-gold{white-space:nowrap;font-variant-numeric:tabular-nums;}
-.hud-icon{font-size:16px;}
-.hud-hp .hud-bar{position:relative;width:96px;min-width:0;height:16px;border-radius:8px;
+.hud-gold{color:var(--gold);font-variant-numeric:tabular-nums;}
+.hud-icon{font-size:15px;}
+.hud-hp .hud-bar{position:relative;display:grid;place-items:center;min-width:58px;height:16px;border-radius:8px;
   background:#3a1e17;overflow:hidden;border:1px solid #5a2b1f;}
 .hud-bar-fill{position:absolute;inset:0;width:100%;
   background:linear-gradient(180deg,#d05a3c,#8f2c1e);transition:width .3s;}
-.hud-hp #hp-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-  font-size:11px;color:#fff;text-shadow:0 1px 2px #000;}
-.hud-gold{color:var(--gold);} .hud-diff{color:var(--accent2);font-size:13px;}
+.hud-hp #hp-text{position:relative;padding:0 3px;line-height:1;white-space:nowrap;
+  font-size:11px;color:#fff;text-shadow:0 1px 2px #000;font-variant-numeric:tabular-nums;}
+#hud .icon-btn{flex:0 0 auto;padding:0;white-space:nowrap;}
 #board-wrap{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;width:100%;padding:6px;}
 #board{background:transparent;touch-action:none;max-width:100%;max-height:100%;}
 #game-footer{width:100%;max-width:640px;padding:8px 14px 14px;}
@@ -139,22 +141,17 @@ html,body{margin:0;height:100%;font-family:"Georgia","Songti SC",serif;color:var
 
 .hidden{display:none!important;}
 @media(max-width:520px){
-  #hud{padding:8px 8px;gap:6px;}
-  .hud-stat{padding:4px 6px;font-size:12px;gap:4px;}
-  .hud-hp .hud-bar{width:52px;height:14px;}
+  #hud{padding:5px 6px;gap:4px;}
+  .hud-stat{padding:3px 5px;font-size:12px;gap:3px;min-height:36px;}
+  .hud-hp .hud-bar{min-width:46px;height:14px;}
   .hud-icon{font-size:13px;}
-  .hud-stat{min-height:36px;}
-  .hud-left{gap:5px;}
+  .hud-left,.hud-right{gap:4px;}
   .icon-btn{width:36px;height:36px;font-size:16px;flex:0 0 36px;}
 }
-@media(max-width:460px){
-  .hud-left{flex:1 0 100%;}
-  .hud-right{margin-left:auto;}
-  .hud-hp .hud-bar{width:96px;}
-  .hud-diff{display:flex;}
-}
 @media(max-width:340px){
-  .hud-hp .hud-bar{width:68px;}
+  #hud{padding-inline:4px;gap:3px;}
+  .hud-left,.hud-right{gap:3px;}
+  .hud-stat{padding-inline:4px;gap:2px;}
 }
 
 /* ---------- 状态栏 buff/debuff ---------- */
@@ -277,16 +274,16 @@ html,body{margin:0;height:100%;font-family:"Georgia","Songti SC",serif;color:var
 /* ---------- 顶部武器名称 / 功能地点确认 ---------- */
 .hud-weapon{min-width:0}
 .weapon-hud-copy{display:flex;flex-direction:column;align-items:flex-start;line-height:1.05;min-width:0}
-#weapon-name{max-width:86px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink-dim);font-size:11px;letter-spacing:.3px}
+#weapon-name{max-width:86px;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink-dim);font-size:11px;letter-spacing:.3px}
 #weapon-name.armed{color:#d7c7ad}
-.weapon-power{font-size:12px;color:var(--ink-dim);margin-top:3px}
+.weapon-power{white-space:nowrap;font-size:12px;color:var(--ink-dim);margin-top:3px}
 .weapon-power b{font-size:15px;color:var(--ink);font-weight:700}
 .location-confirm-panel{overflow:hidden;text-align:center}
 .location-confirm-panel::before{content:"";position:absolute;inset:0 0 auto 0;height:4px;background:linear-gradient(90deg,transparent,var(--accent2),transparent);opacity:.8}
 .location-kicker{display:inline-block;margin:0 auto 7px;padding:4px 9px;border:1px solid #6b543d;border-radius:999px;background:rgba(0,0,0,.22);color:var(--accent2);font-size:11px;letter-spacing:2px}
 .location-confirm-text{line-height:1.65;margin:8px 0 12px;color:var(--ink)}
 .location-risk-note{padding:10px 12px;border:1px dashed var(--line);border-radius:10px;background:rgba(0,0,0,.18);color:var(--ink-dim);font-size:12px;line-height:1.5}
-@media(max-width:520px){.hud-weapon{min-width:0;padding-left:5px;padding-right:5px;gap:4px}#weapon-name{max-width:56px;font-size:10px}.weapon-power{font-size:10px}.weapon-power b{font-size:13px}}
+@media(max-width:520px){.hud-weapon{min-width:0}#weapon-name{max-width:56px;font-size:10px}.weapon-power{font-size:10px}.weapon-power b{font-size:13px}}
 
 /* HUD 状态长按提示 */
 #status-hint-popup{position:fixed;z-index:9999;width:230px;max-width:80vw;display:flex;flex-direction:column;gap:6px;padding:12px 14px;border-radius:12px;background:rgba(25,18,12,.96);border:1px solid var(--accent2);box-shadow:0 8px 30px rgba(0,0,0,.7);color:var(--ink);font-size:13px;line-height:1.45;pointer-events:none;opacity:0;transform:translateY(8px);transition:.15s;}
