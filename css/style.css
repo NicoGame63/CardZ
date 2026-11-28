@@ -323,11 +323,13 @@ html,body{margin:0;height:100%;font-family:"Georgia","Songti SC",serif;color:var
 .st-environment.env-nuclear .si-val{color:#b9f47c;text-shadow:0 0 7px rgba(140,255,75,.55);}
 
 /* V1.5.9 audio / HUD / readable logs */
-.hud-environment{flex:0 0 auto;white-space:pre-line;line-height:1.05;font-size:13px;padding:3px 4px;background:rgba(0,0,0,.28);border:1px solid var(--line);border-radius:7px;color:var(--ink);cursor:pointer;}
+.hud-environment{flex:0 0 auto;white-space:nowrap;line-height:1.1;font-size:13px;padding:3px 4px;background:rgba(0,0,0,.28);border:1px solid var(--line);border-radius:7px;color:var(--ink);cursor:pointer;}
 #hud{flex-wrap:wrap;}
 #log-line{justify-content:flex-start;min-height:55px;max-height:22dvh;overflow-y:auto;overflow-x:hidden;}
 #log-line .log-entry{flex:0 0 auto;height:auto;min-height:17px;white-space:normal;overflow:visible;overflow-wrap:anywhere;text-overflow:clip;}
 .death-reason{margin:-8px 0 18px;text-align:center;color:var(--ink-dim);font-size:14px;line-height:1.55;overflow-wrap:anywhere;white-space:normal;}
 .audio-setting{display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--ink);font-size:14px;}
+.audio-setting select{max-width:65%;background:#211e19;color:var(--ink);border:1px solid var(--line);border-radius:5px;padding:6px;font:inherit;}
+.audio-setting+.audio-setting{margin-top:12px;}
 .audio-setting input{width:21px;height:21px;accent-color:var(--accent2);}
 @media(max-width:340px){.hud-environment{font-size:12px;padding:2px;}#hud .icon-btn{width:30px;}.hud-left{gap:2px;}}
