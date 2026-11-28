@@ -94,6 +94,7 @@
           <button class="btn" id="btn-continue">继续冒险</button>
           <button class="btn" id="btn-heroes">英雄选择</button>
           <button class="btn" id="btn-codex">图鉴 / 解锁</button>
+          <button class="btn" id="btn-settings">设置</button>
           <button class="btn" id="btn-help">游戏说明</button>
         </div>
         <div class="menu-footer">
@@ -124,6 +125,7 @@
           <div class="hud-stat hud-gold"><span class="hud-icon">◉</span><span id="gold-text">0</span></div>
         </div>
         <div class="hud-right">
+          <button class="hud-environment" id="hud-environment" aria-label="昼夜与天气">☀️<br>☀️</button>
           <button class="icon-btn" id="btn-ability" title="主动技能">✦</button>
           <button class="icon-btn" id="btn-pause" title="菜单">☰</button>
         </div>
@@ -138,6 +140,7 @@
         <h2>暂停</h2>
         <div class="panel-buttons vertical">
           <button class="btn btn-primary" id="btn-resume">继续</button>
+          <button class="btn" id="btn-pause-settings">设置</button>
           <button class="btn" id="btn-restart">重新开始本局</button>
           <button class="btn" id="btn-save-exit">保存并返回主菜单</button>
           <button class="btn btn-danger" id="btn-quit">放弃本局</button>
@@ -146,9 +149,14 @@
       </div>
     </section>
 
+    <section id="screen-settings" class="screen overlay" style="z-index:60">
+      <div class="panel small"><h2>设置</h2><label class="audio-setting"><span>背景音乐（FC 风格）</span><input type="checkbox" id="setting-music"></label><div class="panel-buttons"><button class="btn btn-primary" id="btn-settings-close">返回</button></div></div>
+    </section>
+
     <section id="screen-over" class="screen overlay">
       <div class="panel">
         <h2 id="over-title">你噶了</h2>
+        <p id="death-reason" class="death-reason"></p>
         <div class="result-grid">
           <div class="result-item"><span>本局得分</span><b id="res-score">0</b></div>
           <div class="result-item"><span>历史最高</span><b id="res-best">0</b></div>
